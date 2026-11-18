@@ -77,13 +77,15 @@ export function redirectUri(req) {
 }
 export function authorizeUrl(req, state) {
   const p = new URLSearchParams({
-    response_type: "code", client_id: process.env.SPOTIFY_CLIENT_ID || "",
+    response_type: "code", client_id: (process.env.SPOTIFY_CLIENT_ID || "").trim(),
     scope: SCOPES, redirect_uri: redirectUri(req), state
   });
   return "https://accounts.spotify.com/authorize?" + p;
 }
 async function tokenRequest(params) {
-  const basic = Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString("base64");
+  const id = (process.env.SPOTIFY_CLIENT_ID || "").trim();
+  const secret = (process.env.SPOTIFY_CLIENT_SECRET || "").trim();
+  const basic = Buffer.from(`${id}:${secret}`).toString("base64");
   const r = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: { Authorization: `Basic ${basic}`, "Content-Type": "application/x-www-form-urlencoded" },
