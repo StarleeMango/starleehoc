@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wild Starlee</title>
+<meta name="description" content="Starlee Hoc's corner of the internet: a pixel bird that levels up with his week, field notes and what he's listening to.">
+<meta property="og:title" content="A wild Starlee appeared">
+<meta property="og:description" content="A pixel bird that levels up with Starlee's week, plus field notes and top songs.">
+<meta property="og:url" content="https://starleehoc.com">
+<meta name="theme-color" content="#1d2038">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=DotGothic16&family=Pixelify+Sans:wght@500;700&display=swap">
+<style>
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+/* Layout: a handheld with two stacked screens. The top screen is the battle scene, the bottom screen holds his week, his log and his songs. */
+:root {
+  color-scheme: dark;
+  --shell: #1d2038;
+  --shell-edge: #33375c;
+  --screen: #f3f0dc;
+  --screen-2: #e4e2c8;
+  --ink: #23264a;
+  --ink-soft: #565a7c;
+  --teal: #1f9c94;
+  --coral: #e8505b;
+  --sun: #f7c548;
+  --page-fg: #dfe2f5;
+  --page-soft: #a5aace;
+  --good: #1f8a5b;
+  --low: #c8413c;
+  --display: "Pixelify Sans", "Courier New", monospace;
+  --data: "DotGothic16", "Courier New", monospace;
+  --body: "Atkinson Hyperlegible", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--shell);
+  color: var(--page-fg);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 900px; margin-inline: auto; display: grid; gap: 20px; }
+header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 24px; }
+h1 { font: 700 2.25rem/1.1 var(--display); margin: 0; letter-spacing: .01em; }
+h1 span { color: var(--sun); }
+header nav { display: flex; gap: 16px; font-family: var(--data); }
+a { color: inherit; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.notice { margin: 0; font-family: var(--data); font-size: .9rem; color: var(--page-soft); }
+
+.top { position: relative; border: 6px solid var(--shell-edge); background: #2a2b55; line-height: 0; }
+canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; cursor: pointer; }
+.status {
+  position: absolute; top: 14px; right: 14px; width: min(290px, 42%);
+  background: var(--screen); color: var(--ink); border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink); padding: 8px 12px; line-height: 1.3;
+}
+.status-top { display: flex; justify-content: space-between; gap: 8px; font: 700 1.15rem var(--display); }
+.hp { display: grid; grid-template-columns: auto 1fr; gap: 6px; align-items: center; font: .8rem var(--data); margin-top: 4px; }
+.track { height: 8px; background: var(--screen-2); border: 2px solid var(--ink); }
+.fill { display: block; height: 100%; background: var(--teal); }
+.xp .fill { background: var(--sun); }
+.chip { display: inline-block; margin-top: 6px; padding: 0 6px; background: var(--coral); color: #fff; font: .8rem var(--data); }
+.dialog {
+  background: var(--screen); color: var(--ink); border-top: 6px solid var(--shell-edge);
+  padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  font: 1.05rem/1.4 var(--data); min-height: 74px;
+}
+.dialog p { margin: 0; min-width: 0; }
+.cheer {
+  flex: none; font: 700 1rem var(--display); color: var(--ink); background: var(--sun);
+  border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); padding: 6px 12px; cursor: pointer;
+}
+.cheer:active { transform: translate(3px, 3px); box-shadow: none; }
+
+.bottom { background: var(--screen); color: var(--ink); border: 6px solid var(--shell-edge); display: grid; grid-template-columns: 1.15fr 1fr; }
+section { padding: 20px; min-width: 0; }
+.stats { grid-row: span 2; border-right: 3px solid var(--ink); }
+.log { border-bottom: 3px solid var(--ink); }
+.full { grid-column: 1 / -1; border-top: 3px solid var(--ink); }
+h2 { font: 700 1.4rem/1.2 var(--display); margin: 0; }
+.sub { margin: 2px 0 14px; color: var(--ink-soft); font-size: .92rem; }
+
+.stat { border-bottom: 2px dotted var(--ink-soft); }
+.stat button {
+  width: 100%; background: none; border: 0; color: inherit; cursor: pointer; text-align: left;
+  display: grid; grid-template-columns: 74px 1fr 32px 44px; gap: 8px; align-items: center; padding: 9px 2px;
+  font: 1rem var(--data); font-variant-numeric: tabular-nums;
+}
+.stat button:hover { background: var(--screen-2); }
+.stat .name { font-family: var(--display); font-weight: 700; }
+.stat .num { text-align: right; }
+.delta { text-align: right; font-size: .85rem; }
+.up { color: var(--good); } .down { color: var(--low); }
+.more { padding: 0 2px 12px; font-size: .95rem; }
+.more strong { font-family: var(--data); font-weight: 400; font-size: 1.1rem; display: block; }
+.more p { margin: 2px 0 0; color: var(--ink-soft); }
+
+ol, ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.entry { display: grid; grid-template-columns: 1fr auto; gap: 0 10px; }
+.entry b { font-size: 1rem; }
+.entry time, .entry .tag { font: .82rem var(--data); color: var(--ink-soft); }
+.entry .xpgain { font: .9rem var(--data); color: var(--teal); text-align: right; }
+.entry p { grid-column: 1 / -1; margin: 0; font-size: .95rem; }
+
+.playing { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-family: var(--data); }
+.eq { display: flex; gap: 2px; align-items: flex-end; height: 16px; flex: none; }
+.eq i { width: 4px; height: 100%; background: var(--coral); animation: eq 1s steps(4) infinite; transform-origin: bottom; }
+.eq i:nth-child(2) { animation-delay: -.3s; } .eq i:nth-child(3) { animation-delay: -.6s; }
+@keyframes eq { 0%,100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+.songs { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.song { display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: baseline; }
+.song .rank { font: 700 1.3rem var(--display); }
+.song span { display: block; }
+.song .artist { color: var(--ink-soft); font-size: .92rem; }
+.song .move { font: .85rem var(--data); }
+
+.noteform { display: grid; gap: 6px; max-width: 560px; justify-items: start; margin-bottom: 18px; }
+.noteform label { font: .9rem var(--data); }
+.noteform input, .noteform textarea {
+  width: 100%; font: 1rem var(--body); color: var(--ink); background: #fffdf0; border: 3px solid var(--ink); padding: 8px; border-radius: 0;
+}
+.noteform .cheer { margin-top: 6px; }
+.noteform .cheer:disabled { opacity: .55; cursor: default; }
+.formmsg { margin: 0; min-height: 1.5em; font-size: .92rem; color: var(--ink-soft); }
+.notes { gap: 10px; }
+.note { border-left: 4px solid var(--teal); padding-left: 10px; min-width: 0; }
+.note b { display: inline; }
+.note time { font: .82rem var(--data); color: var(--ink-soft); margin-left: 8px; }
+.note p { margin: 0; overflow-wrap: anywhere; }
+.note button { background: none; border: 0; padding: 0; color: var(--low); cursor: pointer; font: .82rem var(--data); text-decoration: underline; margin-left: 8px; }
+.empty { color: var(--ink-soft); }
+
+.eq.off i { animation: none; transform: scaleY(.25); opacity: .5; }
+.song { grid-template-columns: 30px 40px 1fr auto; }
+.song img { width: 40px; height: 40px; display: block; border: 2px solid var(--ink); }
+.song a { color: inherit; text-decoration: none; }
+.song a:hover { text-decoration: underline; }
+.playing a { color: inherit; }
+.trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.notes .note:first-child { animation: none; }
+
+@media (max-width: 680px) {
+  .status { position: static; width: auto; box-shadow: none; border-width: 3px 0 0; }
+  .bottom { grid-template-columns: 1fr; }
+  .stats { border-right: 0; border-bottom: 3px solid var(--ink); }
+  .log { border-bottom: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .eq i { animation: none; transform: scaleY(.7); } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>A wild <span>Starlee</span> appeared</h1>
+    <nav aria-label="Elsewhere" id="links"></nav>
+  </header>
+  <p class="notice" id="notice" hidden></p>
+
+  <div class="top">
+    <canvas id="scene" width="320" height="136" role="img" aria-label="A round teal pixel bird wearing yellow headphones, bobbing on a grassy hill above San Francisco at dusk"></canvas>
+    <div class="status">
+      <div class="status-top"><span>STARLEE</span><span id="level"></span></div>
+      <div class="hp"><span>HP</span><span class="track"><span class="fill" id="hpFill"></span></span></div>
+      <div class="hp xp"><span>XP</span><span class="track"><span class="fill" id="xpFill"></span></span></div>
+      <span class="chip" id="status"></span>
+    </div>
+    <div class="dialog">
+      <p id="dialog" aria-live="polite"></p>
+      <button class="cheer" id="cheer" type="button">Cheer</button>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <section class="stats">
+      <h2>This week's stats</h2>
+      <p class="sub"><span id="weekLabel"></span>. Scored against his own usual week. HP, ATK, DEF and SPEED come from health data. SP. ATK and SP. DEF come from his field notes. Tap a stat for the details.</p>
+      <div id="stats"></div>
+    </section>
+    <section class="log">
+      <h2>Field notes</h2>
+      <p class="sub">Things that earned XP.</p>
+      <ol id="log"></ol>
+    </section>
+    <section>
+      <h2>Level</h2>
+      <p class="sub">Levels only go up. Stats can drop any week.</p>
+      <p style="margin:0" id="levelNote"></p>
+      <p style="margin:6px 0 0" id="cheerTotal"></p>
+    </section>
+    <section class="full">
+      <h2>On repeat</h2>
+      <p class="sub">Most played on Spotify in the past 7 days.</p>
+      <div class="playing"><span class="eq off" aria-hidden="true"><i></i><i></i><i></i></span><span id="playing">Checking Spotify…</span></div>
+      <ol class="songs" id="songs"><li class="empty">Loading songs…</li></ol>
+    </section>
+    <section class="full">
+      <h2>Leave a note</h2>
+      <p class="sub">Notes are public. Say hi, recommend a song or leave a chicken stock tip.</p>
+      <form id="noteForm" class="noteform">
+        <label for="noteName">Your name (optional)</label>
+        <input id="noteName" maxlength="40" autocomplete="name">
+        <label for="noteText">Your note</label>
+        <textarea id="noteText" rows="3" maxlength="280" required></textarea>
+        <div class="trap" aria-hidden="true"><label for="noteWebsite">Leave this empty</label><input id="noteWebsite" tabindex="-1" autocomplete="off"></div>
+        <button class="cheer" id="noteSend" type="submit">Post note</button>
+        <p class="formmsg" id="noteMsg" role="status"></p>
+      </form>
+      <ul class="notes" id="notes"><li class="empty">Loading notes…</li></ul>
+    </section>
+  </div>
+</div>
+
+<script src="/content.js"></script>
+<script>
+const DATA = window.SITE;
+
+const $ = id => document.getElementById(id);
+const level = Math.floor(DATA.totalXp / 100) + 1;
+const hp = DATA.stats[0].value;
+const drowsy = DATA.week.sleepHours < 7;
+$("weekLabel").textContent = DATA.week.label;
+
+$("level").textContent = "Lv " + level;
+$("hpFill").style.width = hp + "%";
+$("xpFill").style.width = (DATA.totalXp % 100) + "%";
+$("status").textContent = drowsy ? "DROWSY" : "READY";
+$("levelNote").textContent = `Level ${level}. ${100 - DATA.totalXp % 100} XP to the next level.`;
+$("links").innerHTML = "";
+DATA.links.filter(l => l.url).forEach(l => {
+  const a = document.createElement("a"); a.href = l.url; a.textContent = l.label; a.rel = "me noopener"; $("links").append(a);
+});
+if (DATA.notice) { $("notice").textContent = DATA.notice; $("notice").hidden = false; }
+
+const statsEl = $("stats");
+DATA.stats.forEach((s, i) => {
+  const row = document.createElement("div");
+  row.className = "stat";
+  const known = typeof s.value === "number";
+  const hasDelta = typeof s.delta === "number";
+  const deltaText = !hasDelta ? "" : s.delta === 0 ? "=" : (s.delta > 0 ? "+" : "") + s.delta;
+  row.innerHTML = `<button type="button" id="stat-${i}" aria-expanded="${i === 0}" aria-controls="more-${i}">
+      <span class="name">${s.key}</span>
+      <span class="track"><span class="fill" style="width:${known ? s.value : 0}%"></span></span>
+      <span class="num">${known ? s.value : "??"}</span>
+      <span class="delta ${hasDelta && s.delta > 0 ? "up" : hasDelta && s.delta < 0 ? "down" : ""}">${deltaText}</span>
+    </button>
+    <div class="more" id="more-${i}" ${i === 0 ? "" : "hidden"}><strong>${s.label}: ${s.avg}</strong><p>${s.note}</p></div>`;
+  statsEl.append(row);
+});
+statsEl.addEventListener("click", e => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  const open = btn.getAttribute("aria-expanded") === "true";
+  statsEl.querySelectorAll("button").forEach(b => {
+    b.setAttribute("aria-expanded", "false");
+    b.nextElementSibling.hidden = true;
+  });
+  if (!open) { btn.setAttribute("aria-expanded", "true"); btn.nextElementSibling.hidden = false; }
+});
+
+$("log").innerHTML = DATA.log.map(p => `<li class="entry">
+  <b>${p.title}</b><span class="xpgain">+${p.xp} XP</span>
+  <span class="tag">${p.tag} · <time>${p.date}</time></span><span></span>
+  <p>${p.text}</p></li>`).join("");
+
+/* Pixel scene */
+const cv = $("scene"), g = cv.getContext("2d");
+const W = cv.width, H = cv.height;
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function buildBackdrop() {
+  const b = document.createElement("canvas"); b.width = W; b.height = H;
+  const c = b.getContext("2d");
+  const bands = ["#2a2b55", "#433566", "#6c4274", "#a5527a", "#dc6f71", "#f4a261"];
+  const bandH = 15;
+  for (let y = 0; y < 90; y++) {
+    const f = y / bandH, i = Math.min(Math.floor(f), bands.length - 1);
+    for (let x = 0; x < W; x++) {
+      const mix = (f % 1) > .66 && ((x + y) % 2 === 0) ? Math.min(i + 1, bands.length - 1) : i;
+      c.fillStyle = bands[mix]; c.fillRect(x, y, 1, 1);
+    }
+  }
+  c.fillStyle = "#fff4c9";
+  [[22,8],[60,20],[130,6],[182,14],[240,9],[296,22],[98,28]].forEach(([x,y]) => c.fillRect(x, y, 1, 1));
+  /* city hills and houses */
+  const hill = (color, base, amp, freq, phase) => {
+    c.fillStyle = color;
+    for (let x = 0; x < W; x++) {
+      const top = Math.round(base + Math.sin(x * freq + phase) * amp);
+      c.fillRect(x, top, 1, H - top);
+    }
+  };
+  hill("#5b3f73", 72, 9, .018, 1);
+  c.fillStyle = "#3d3163";
+  for (let x = 6; x < W; x += 13) {
+    const top = Math.round(82 + Math.sin(x * .03) * 6), h = 7 + (x * 7 % 9);
+    c.fillRect(x, top - h, 10, h + 12);
+  }
+  c.fillStyle = "#f7c548";
+  for (let x = 9; x < W; x += 13) {
+    const top = Math.round(82 + Math.sin(x * .03) * 6);
+    if (x % 3 !== 0) c.fillRect(x, top - 4, 2, 2);
+  }
+  hill("#2f6b5e", 100, 4, .03, 2);
+  hill("#3f9a6a", 112, 2, .05, 0);
+  /* mound the bird stands on */
+  c.fillStyle = "#6fc26b";
+  for (let y = 0; y < 13; y++) {
+    const half = Math.round(58 * Math.sqrt(1 - (y - 6.5) ** 2 / 45));
+    c.fillRect(88 - half, 112 + y, half * 2, 1);
+  }
+  c.fillStyle = "#4fa45a";
+  for (let x = 40; x < 136; x += 7) c.fillRect(x, 117 + (x % 4), 3, 1);
+  return b;
+}
+const backdrop = buildBackdrop();
+
+let INK = "#23264a", BODY = "#1fb5a8", SHADE = "#14877f", WING = "#0f6f6c", CREAM = "#fff3d6",
+    CORAL = "#e8505b", SUN = "#f7c548", SUN2 = "#d9962b", FOOT = "#f28c38", WHITE = "#ffffff";
+function goShiny() { BODY = "#f59ac0"; SHADE = "#d96a9c"; WING = "#b84f86"; CORAL = "#7a5cd6"; }
+const S = 60;
+
+function bird(frame, opts) {
+  const grid = new Array(S * S).fill(null);
+  const set = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < S && y < S) grid[y * S + x] = c; };
+  const oval = (cx, cy, rx, ry, c, shade) => {
+    for (let y = -ry; y <= ry; y++) for (let x = -rx; x <= rx; x++)
+      if ((x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1) {
+        const dark = shade && (x * -.5 + y) / (rx + ry) > .32 && ((x + y) % 2 === 0 || (x * -.5 + y) / (rx + ry) > .46);
+        set(cx + x, cy + y, dark ? shade : c);
+      }
+  };
+  const bob = [0, 1, 2, 1][frame], flap = [0, -1, -2, -1][frame], squash = opts.hop ? 0 : bob > 1 ? 1 : 0;
+  const dy = bob;
+  /* tail */
+  for (let i = 0; i < 9; i++) { set(9 - i * .4, 38 + dy + i * .2, CORAL); set(9 - i * .5, 39 + dy + i * .5, SHADE); set(10 - i * .3, 40 + dy + i * .7, CORAL); }
+  /* feet */
+  [[24],[33]].forEach(([x]) => { for (let i = 0; i < 4; i++) set(x, 49 + i, FOOT); set(x - 1, 52, FOOT); set(x + 1, 52, FOOT); set(x + 2, 52, FOOT); });
+  /* body and head */
+  oval(28, 36 + dy + squash, 17, 14 - squash, BODY, SHADE);
+  oval(33, 20 + dy, 13, 12, BODY, SHADE);
+  oval(32, 39 + dy, 10, 9, CREAM);
+  /* crest */
+  [[28,8,5],[32,7,6],[36,8,4]].forEach(([x,y,h]) => { for (let i = 0; i < h; i++) { set(x, y + i + dy - 1, CORAL); set(x + 1, y + i + dy, CORAL); } });
+  /* chest star */
+  const sy = 39 + dy;
+  [[0,-2],[0,-1],[-2,0],[-1,0],[0,0],[1,0],[2,0],[-1,1],[0,1],[1,1],[-1,2],[1,2]].forEach(([a,b]) => set(32 + a, sy + b, SUN));
+  /* eye */
+  const eyeY = 19 + dy;
+  if (opts.blink) { for (let i = 0; i < 4; i++) set(38 + i, eyeY + 1, INK); }
+  else {
+    for (let i = opts.drowsy ? 1 : 0; i < 4; i++) { set(38, eyeY + i - 1, INK); set(39, eyeY + i - 1, INK); set(40, eyeY + i - 1, INK); }
+    if (!opts.drowsy) set(39, eyeY - 1, WHITE);
+    else for (let i = 0; i < 4; i++) set(37 + i, eyeY - 1, SHADE);
+  }
+  /* beak */
+  for (let y = 0; y < 5; y++) for (let x = 0; x < 7 - Math.abs(y - 2) * 2; x++) set(45 + x, 21 + y + dy, y < 3 ? SUN : SUN2);
+  /* headphones */
+  for (let a = Math.PI * .98; a < Math.PI * 1.9; a += .03) set(32 + Math.cos(a) * 13, 19 + dy + Math.sin(a) * 13, INK);
+  oval(30, 23 + dy, 4, 5, SUN, SUN2);
+  oval(30, 23 + dy, 2, 3, CORAL);
+  /* wing */
+  oval(18, 34 + dy + flap, 7, 9 + flap, BODY, WING);
+  for (let i = 0; i < 3; i++) set(14 + i * 3, 41 + dy + flap * 2, WING);
+  /* outline */
+  const out = grid.slice();
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    if (grid[y * S + x]) continue;
+    const near = [[1,0],[-1,0],[0,1],[0,-1]].some(([a,b]) => { const X = x + a, Y = y + b; return X >= 0 && Y >= 0 && X < S && Y < S && grid[Y * S + X]; });
+    if (near) out[y * S + x] = INK;
+  }
+  return out;
+}
+
+const heart = [[1,0],[3,0],[0,1],[1,1],[2,1],[3,1],[4,1],[1,2],[2,2],[3,2],[2,3]];
+let hopUntil = 0, cheers = 0, hearts = [], trick = null, shiny = false;
+const TRICKS = {
+  loop: { ms: 1500, say: "Starlee flew a full loop." },
+  twirl: { ms: 900, say: "Starlee did a twirl." },
+  dance: { ms: 1800, say: "Starlee is dancing to its headphones." }
+};
+
+function trickPose(now) {
+  if (!trick) return { dx: 0, dy: 0, flip: false };
+  const p = (now - trick.start) / TRICKS[trick.name].ms;
+  if (p >= 1) { trick = null; return { dx: 0, dy: 0, flip: false }; }
+  if (trick.name === "loop") {
+    const a = p * Math.PI * 2;
+    return { dx: Math.round(Math.sin(a) * 34), dy: Math.round((Math.cos(a) - 1) * 26), flip: Math.cos(a) < 0 };
+  }
+  if (trick.name === "twirl") return { dx: 0, dy: -Math.round(Math.sin(p * Math.PI) * 10), flip: Math.floor(p * 8) % 2 === 1 };
+  const beat = Math.floor(p * 8);
+  return { dx: beat % 2 ? 7 : -7, dy: beat % 2 ? -3 : 0, flip: beat % 2 === 1 };
+}
+
+function draw(now) {
+  g.imageSmoothingEnabled = false;
+  g.drawImage(backdrop, 0, 0);
+  const pose = trickPose(now);
+  const busy = !!trick;
+  const frame = still ? 0 : Math.floor(now / (busy ? 70 : 170)) % 4;
+  const blink = !still && !busy && now % 3600 < 170;
+  const hopping = now < hopUntil;
+  const hopY = hopping ? -Math.round(Math.sin((hopUntil - now) / 500 * Math.PI) * 12) : 0;
+  const awake = hopping || busy;
+  const px = bird(frame, { blink, drowsy: drowsy && !awake, hop: hopping });
+  const ox = 58 + pose.dx, oy = 62 + hopY + pose.dy;
+  g.fillStyle = "rgba(35,38,74,.35)"; g.fillRect(70 + pose.dx, 115, 38, 3);
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    const c = px[y * S + x];
+    if (c) { g.fillStyle = c; g.fillRect(ox + (pose.flip ? S - 1 - x : x), oy + y, 1, 1); }
+  }
+  if (drowsy && !awake && !still) {
+    const step = Math.floor(now / 500) % 3;
+    g.fillStyle = "#fff4c9";
+    for (let i = 0; i <= step; i++) {
+      const zx = 118 + i * 7, zy = 70 - i * 8;
+      g.fillRect(zx, zy, 4, 1); g.fillRect(zx + 2, zy + 1, 1, 1); g.fillRect(zx + 1, zy + 2, 1, 1); g.fillRect(zx, zy + 3, 4, 1);
+    }
+  }
+  g.fillStyle = "#e8505b";
+  hearts = hearts.filter(h => now - h.t < 1100);
+  hearts.forEach(h => {
+    const age = Math.max(0, (now - h.t) / 1100);
+    const y = Math.round(h.y - age * 26);
+    heart.forEach(([a, b]) => g.fillRect(h.x + a, y + b, 1, 1));
+  });
+}
+function loop(now) { draw(now); requestAnimationFrame(loop); }
+draw(0);
+if (!still) requestAnimationFrame(loop);
+
+const lines = [
+  drowsy ? "Starlee is DROWSY. Bedtime keeps sneaking past midnight." : "Starlee is ready for the week.",
+  `Starlee gained ${DATA.log[0].xp} XP from ${DATA.log[0].title.toLowerCase()}.`
+];
+let li = 0;
+$("dialog").textContent = lines[0];
+if (!still) setInterval(() => { li = (li + 1) % lines.length; $("dialog").textContent = lines[li]; }, 6000);
+
+/* Cheers: every cheer gets a hop. Cheer 5 always gets a trick. After that each cheer has a 1 in 4 chance, and a 1 in 40 chance of a pink shiny bird. */
+function startTrick(now) {
+  const names = Object.keys(TRICKS);
+  const name = cheers === 5 ? "loop" : names[Math.floor(Math.random() * names.length)];
+  trick = { name, start: now };
+  return TRICKS[name].say;
+}
+function cheer() {
+  const now = performance.now();
+  cheers++;
+  for (let i = 0; i < 3; i++) hearts.push({ x: 72 + i * 14, y: 66 + (i % 2) * 8, t: now + i * 90 });
+  let say = cheers === 1 ? "You cheered for Starlee. It perked right up." : `You cheered ${cheers} times.`;
+  if (!shiny && cheers > 5 && Math.random() < 1 / 40) {
+    shiny = true; goShiny();
+    say = "What's this? Starlee turned pink. You found the shiny.";
+  } else if (!trick && !still && (cheers === 5 || (cheers > 5 && Math.random() < .25))) {
+    say = startTrick(now);
+  } else if (!trick) {
+    hopUntil = now + 500;
+  }
+  $("dialog").textContent = say;
+  saveCheers();
+  if (still) draw(now);
+}
+$("cheer").addEventListener("click", cheer);
+cv.addEventListener("click", cheer);
+
+/* Live data from the site's API: notes, cheers and Spotify. */
+async function api(path, options) {
+  const r = await fetch(path, options);
+  let body = {};
+  try { body = await r.json(); } catch {}
+  return { ok: r.ok, status: r.status, body };
+}
+
+/* Cheers are sent in small batches so fast clicking doesn't flood the server. */
+let serverTotal = 0, unsent = 0, cheerTimer = null;
+function showTotal() {
+  const total = serverTotal + unsent;
+  $("cheerTotal").textContent = total === 1 ? "1 cheer so far." : `${total.toLocaleString()} cheers so far.`;
+}
+function saveCheers() {
+  unsent++;
+  showTotal();
+  clearTimeout(cheerTimer);
+  cheerTimer = setTimeout(flushCheers, 1200);
+}
+async function flushCheers() {
+  if (!unsent) return;
+  const count = Math.min(unsent, 20);
+  unsent -= count;
+  try {
+    const r = await api("/api/cheers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ count }) });
+    if (typeof r.body.total === "number") serverTotal = r.body.total;
+  } catch {}
+  showTotal();
+  if (unsent) cheerTimer = setTimeout(flushCheers, 1200);
+}
+api("/api/cheers").then(r => { if (typeof r.body.total === "number") { serverTotal = r.body.total; showTotal(); } }).catch(() => {});
+
+/* Notes */
+let notes = [];
+function renderNotes(message) {
+  const box = $("notes");
+  box.textContent = "";
+  if (message || !notes.length) {
+    const li = document.createElement("li"); li.className = "empty";
+    li.textContent = message || "No notes yet. Yours can be the first.";
+    box.append(li); return;
+  }
+  notes.forEach(n => {
+    const li = document.createElement("li"); li.className = "note";
+    const b = document.createElement("b"); b.textContent = n.name || "Anonymous";
+    const t = document.createElement("time");
+    const when = new Date(n.at);
+    t.textContent = isNaN(when) ? "" : when.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const p = document.createElement("p"); p.textContent = n.text;
+    li.append(b, t, p);
+    box.append(li);
+  });
+}
+api("/api/notes").then(r => {
+  if (r.ok) { notes = r.body.notes || []; renderNotes(); }
+  else renderNotes("Notes can't be loaded right now.");
+}).catch(() => renderNotes("Notes can't be loaded right now."));
+
+/* Same word and link filter as the server, so most bad notes are stopped before sending. */
+const STEMS = ["fuck", "shit", "bitch", "cunt", "nigg", "fagg"];
+const WORDS = ["ass", "asshole", "bastard", "dick", "cock", "pussy", "slut", "whore", "porn", "porno", "nude", "nudes", "penis", "vagina", "boob", "tit", "blowjob", "horny", "rape", "retard", "kys", "fag", "dyke", "tranny", "chink", "spic", "kike", "gook"];
+const stretch = w => w.split("").map(c => c + "+").join("");
+const BLOCK = new RegExp("\\b(?:" + [...STEMS.map(w => stretch(w) + "\\w*"), ...WORDS.map(w => stretch(w) + "(?:e?s)?")].join("|") + ")\\b");
+const SWAPS = { 0: "o", 1: "i", 3: "e", 4: "a", 5: "s", "@": "a", $: "s", "!": "i" };
+function isBlocked(text) {
+  const plain = text.toLowerCase().replace(/[01345@$!]/g, c => SWAPS[c]);
+  return BLOCK.test(plain) || /https?:|www\.|\.(com|net|org|io|xyz|ru)\b/.test(plain);
+}
+function noteMsg(text) { $("noteMsg").textContent = text; }
+$("noteForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const name = $("noteName").value.trim(), text = $("noteText").value.trim();
+  if (!text) { noteMsg("Write a note first."); return; }
+  if (isBlocked(name + " " + text)) { noteMsg("This note can't be posted. Please keep it friendly and leave out links."); return; }
+  $("noteSend").disabled = true;
+  try {
+    const r = await api("/api/notes", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, text, website: $("noteWebsite").value })
+    });
+    if (r.ok) {
+      if (r.body.note) { notes.unshift(r.body.note); renderNotes(); }
+      $("noteText").value = "";
+      noteMsg("Note posted.");
+    } else {
+      noteMsg(r.body.error || "Your note wasn't saved. Try again in a minute.");
+    }
+  } catch {
+    noteMsg("Your note wasn't saved. Check your connection and try again.");
+  }
+  $("noteSend").disabled = false;
+});
+
+/* Music */
+function timeAgo(ms) {
+  const m = Math.round((Date.now() - ms) / 60000);
+  if (m < 60) return m <= 1 ? "just now" : `${m} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return h === 1 ? "1 hour ago" : `${h} hours ago`;
+  const d = Math.round(h / 24);
+  return d === 1 ? "yesterday" : `${d} days ago`;
+}
+function songLink(s) {
+  const a = document.createElement(s.url ? "a" : "span");
+  if (s.url) { a.href = s.url; a.target = "_blank"; a.rel = "noopener"; }
+  a.textContent = s.title;
+  return a;
+}
+function renderMusic(m) {
+  const playing = $("playing"), songs = $("songs"), eq = document.querySelector(".eq");
+  playing.textContent = ""; songs.textContent = "";
+  const empty = text => { const li = document.createElement("li"); li.className = "empty"; li.textContent = text; songs.append(li); };
+  if (!m || !m.connected) {
+    playing.textContent = "Spotify isn't connected yet.";
+    empty("Top songs will show up here once Spotify is connected.");
+    return;
+  }
+  if (m.nowPlaying) {
+    eq.classList.remove("off");
+    playing.append("Now playing: ", songLink(m.nowPlaying), ", " + m.nowPlaying.artist);
+    lines.splice(1, 0, `Starlee is listening to ${m.nowPlaying.title}.`);
+  } else if (m.lastPlayed) {
+    playing.append("Last played: ", songLink(m.lastPlayed), `, ${m.lastPlayed.artist} · ${timeAgo(m.lastPlayed.at)}`);
+  } else {
+    playing.textContent = "Nothing playing right now.";
+  }
+  if (!m.top || !m.top.length) { empty("No plays saved yet. Songs fill in as he listens."); return; }
+  m.top.forEach((s, i) => {
+    const li = document.createElement("li"); li.className = "song";
+    const rank = document.createElement("span"); rank.className = "rank"; rank.textContent = i + 1;
+    const img = document.createElement("img"); img.alt = ""; img.loading = "lazy"; img.width = 40; img.height = 40;
+    if (s.image) img.src = s.image; else img.style.visibility = "hidden";
+    const info = document.createElement("div");
+    const title = document.createElement("span"); title.append(songLink(s));
+    const artist = document.createElement("span"); artist.className = "artist";
+    artist.textContent = `${s.artist} · ${s.plays} ${s.plays === 1 ? "play" : "plays"}`;
+    info.append(title, artist);
+    const move = document.createElement("span");
+    const m2 = s.move === "new" ? ["NEW", "up"] : s.move > 0 ? ["+" + s.move, "up"] : s.move < 0 ? [String(s.move), "down"] : ["=", ""];
+    move.className = "move " + m2[1]; move.textContent = m2[0];
+    li.append(rank, img, info, move);
+    songs.append(li);
+  });
+}
+api("/api/music").then(r => renderMusic(r.ok ? r.body : null)).catch(() => {
+  $("playing").textContent = "Spotify can't be reached right now.";
+  $("songs").innerHTML = '<li class="empty">Songs can\'t be loaded right now.</li>';
+});
+</script>
+</body>
+</html>
